@@ -1,5 +1,4 @@
 const Socket = require('net').Socket
-const EventEmitter = require('events')
 
 class TCPClient extends Socket {
 

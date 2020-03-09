@@ -1,9 +1,10 @@
 let createFolderInto = ''
 
 function main() {
-    listeners()
-    setPathName()
     materializeSettings()
+    setPathName()
+    listeners()
+    addDirectories()
 }
 
 function materializeSettings() {
@@ -33,7 +34,6 @@ function openModal(e) {
     if(e.target.classList.contains('create-new-folder')) {
         M.Modal.getInstance(document.querySelector('.modal')).open()
         createFolderInto = e.target.parentNode.parentNode.nextElementSibling
-
     }
 }
 
@@ -42,6 +42,24 @@ function addFolder(e) {
     createFolderInto.innerHTML += collapsibleHTML(folder.value)
     folder.value = ''
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
+}
+
+function addDirectories() {
+    let directories = JSON.parse(localStorage.getItem('directories'))
+    document.querySelector('.collapsible-body')
+    // console.log(directories)
+    setTimeout(() => {
+        for(let dir of directories) {
+            for(let str of dir.fullPath.split('\\')) {
+                // console.log(str)
+                for(let spanText of document.querySelectorAll('span.local-root')) {
+                    console.log('STR: ', str)
+                    console.log('SPAN: ', spanText.innerText)
+                }
+            }
+            // console.log(dir)
+        }
+    }, 3000)
 }
 
 function collapsibleHTML(folderName) {

@@ -190,6 +190,7 @@ function action(userId = '', verb = '', ...data) {
 			if (existUser(data[0], data[1])) {
 				let directories = []
 				directories = createDirectory(data[0], directories)
+				console.log(directories)
 				response = { success: true, message: 'Datos de usuario son correctos', path: data[0], directories }
 			} else {
 				response = { success: false, message: 'Datos del usuario son incorrectos' }
@@ -204,14 +205,27 @@ function existUser(username, password) {
 	return JSON.parse(fs.readFileSync('db.json')).users.find(user => user.username === username && user.password === password) ? true : false
 }
 
-function createDirectory(path, directories) {
-	if (!fs.existsSync(path)) {
-		fs.mkdirSync(path)
+function createDirectory(dir, directories) {
+	if (!fs.existsSync(dir)) {
+		fs.mkdirSync(dir)
 	} else {
-		traverseDir(path, directories)
-		console.log(directories[0].split('\\'))
+		traverseDir(dir, directories)
+		// console.log( directories[0].split('\\').join('/') )
+		for(let directory of directories) {
+			directories
+			if(fs.lstatSync(path.join(__dirname, directories[2])).isDirectory()) {
+				
+			}
+		}
+		return directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		// console.log(directories)
+		// console.log(path.join( __dirname, directories[0].split('\\').join('/') ).isDirectory())
 		// console.log(directories.map(fs.lstatSync(el).isDirectory()))
-		return 
 	}
 }
 
