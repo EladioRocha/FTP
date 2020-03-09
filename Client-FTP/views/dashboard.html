@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTP</title>
+    <link rel="stylesheet" href="../assets/css/materialize.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <ul id="tabs-swipe" class="tabs">
+        <li class="tab col s3"><a class="active" href="#tab-swipe-1">Usuario</a></li>
+        <li class="tab col s3"><a href="#tab-swipe-2">Servidor</a></li>
+        <li class="tab col s3"><a href="#tab-swipe-3">Configuraciones</a></li>
+    </ul>
+    <div id="tab-swipe-1" class="col s12">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header grey lighten-3">
+                    <i class="material-icons">folder</i>
+                    <span class="local-root"></span>
+                    <i class="material-icons">arrow_drop_down</i>
+                    <span class="new badge grey lighten-3">
+                        <i class="material-icons grey lighten-3 create-new-folder">create_new_folder</i>
+                    </span>
+                </div>
+                <div class="collapsible-body">
+                    <!-- <ul class="collapsible">
+                        <li>
+                            <div class="collapsible-header">
+                                <i class="material-icons">folder</i>
+                                First
+                                <i class="material-icons">arrow_drop_down</i>
+                            </div>
+                            <div class="collapsible-body">
+                                <ul class="collapsible">
+                                    <li>
+                                        <div class="collapsible-header">
+                                            <i class="material-icons">folder</i>
+                                            First
+                                            <i class="material-icons">arrow_drop_down</i>
+                                        </div>
+                                        <div class="collapsible-body">
+                                            <div class="collapsible-body-file">
+                                                <i class="material-icons left">insert_drive_file</i>
+                                                Lorem ipsum dolor sit amet.
+                                                <i class="material-icons right">file_upload</i>
+                                            </div>
+                                            <div class="collapsible-body-file">
+                                                <i class="material-icons left">insert_drive_file</i>
+                                                Lorem ipsum dolor sit amet.
+                                                <i class="material-icons right">file_upload</i>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="collapsible">
+                                    <li>
+                                        <div class="collapsible-header">
+                                            <i class="material-icons">folder</i>
+                                            First
+                                            <i class="material-icons">arrow_drop_down</i>
+                                        </div>
+                                        <div class="collapsible-body">
+                                            <div class="collapsible-body-file">
+                                                <i class="material-icons left">insert_drive_file</i>
+                                                Lorem ipsum dolor sit amet.
+                                                <i class="material-icons right">file_upload</i>
+                                            </div>
+                                            <div class="collapsible-body-file">
+                                                <i class="material-icons left">insert_drive_file</i>
+                                                Lorem ipsum dolor sit amet.
+                                                <i class="material-icons right">file_upload</i>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul> -->
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div id="tab-swipe-2" class="col s12">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header grey lighten-3">
+                    <i class="material-icons">folder</i>
+                    root
+                    <i class="material-icons">arrow_drop_down</i>
+                    <span class="new badge grey lighten-3 red-text">
+                        <i class="material-icons right">delete_forever</i>
+                    </span>
+                </div>
+                <div class="collapsible-body">
+                    <div class="collapsible-body-file">
+                        <i class="material-icons left">insert_drive_file</i>
+                        Lorem ipsum dolor sit amet.
+                        <i class="material-icons right red-text">delete_forever</i>
+                        <i class="material-icons right">file_download</i>
+                    </div>
+                    <div class="collapsible-body-file">
+                        <i class="material-icons left">insert_drive_file</i>
+                        Lorem ipsum dolor sit amet.
+                        <i class="material-icons right red-text">delete_forever</i>
+                        <i class="material-icons right">file_download</i>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div id="tab-swipe-3" class="col s12">
+        <div class="container-fluid">
+            <div class="row">
+                <section class="col s12">
+                    <p class="col s3">Ruta actual (Local LCD)</p>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">folder_open</i>
+                        <input type="text" class="validate local-root" id="current-directory" min="5">
+                    </div>
+                </section>
+                <section class="col s12">
+                    <p class="col s3">Ruta actual (Servidor CD)</p>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">folder_open</i>
+                        <input type="text" class="validate" id="current-directory" value="root/">
+                    </div>
+                </section>
+                <section class="col s12 mt-2">
+                    <div class="divider mt-2"></div>
+                    <div class="center mt-2">
+                        <button class="btn waves-effect waves-light red lighten-1" id="close-session">Salir
+                            <i class="material-icons right">clear</i>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="input-field col s6">
+                <i class="material-icons prefix">create</i>
+                <input type="text" class="validate" id="new-folder" placeholder="Nueva carpeta">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat green lighten-1" id="add-folder">Crear</a>
+        </div>
+    </div>
+
+
+    <script src=".././assets/js/materialize.min.js"></script>
+    <script src="../assets/js/settings.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+</body>
+
+</html>

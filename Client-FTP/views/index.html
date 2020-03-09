@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Servidor FTP</title>
+    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" /> -->
+    <link rel="stylesheet" href="../assets/css/materialize.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <section class="col s12 mt-2">
+                <p class="col s3">Nombre de usuario:</p>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">person</i>
+                    <input type="text" placeholder="Foo" class="validate" id="username">
+                </div>
+            </section>
+            <section class="col s12 mt-2">
+                <p class="col s3">Contraseña</p>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">lock</i>
+                    <input type="password" placeholder="********" class="validate" id="password">
+                </div>
+            </section>
+            <section class="col s12 mt-2">
+                <p class="col s3">Sevidor</p>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">public</i>
+                    <input type="text" value="127.0.0.1" disabled class="validate grey lighten-3" id="server-address">
+                </div>
+                <div class="input-field col s3">
+                    <i class="material-icons prefix">wifi_tethering</i>
+                    <input type="text" value="3000" disabled class="validate grey lighten-3" id="server-port">
+                </div>
+            </section>
+            <section class="col s12 mt-2">
+                <div class="divider mt-2"></div>
+                <div class="center mt-2">
+                    <button class="btn waves-effect waves-light green lighten-1" id="connect">Entrar
+                        <i class="material-icons right">open_in_new</i>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src=".././assets/js/materialize.min.js"></script>
+    <script src="../assets/js/settings.js"></script>
+    <script src="../assets/js/connection.js"></script>
+</body>
+
+</html>

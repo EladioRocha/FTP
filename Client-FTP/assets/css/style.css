@@ -1,0 +1,26 @@
+.mt-2 {
+    margin-top: 2rem;
+}
+
+span.badge.new {
+    color: rgba(0,0,0,0.87);
+}
+
+span.badge.new:after {
+    content: none;
+}
+
+.collapsible {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.collapsible-body {
+    border: none;
+    padding: 0 0 0 1rem;
+}
+
+.collapsible-body-file {
+    padding: 1rem;
+}
