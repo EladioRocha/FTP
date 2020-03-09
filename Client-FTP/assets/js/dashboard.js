@@ -1,14 +1,14 @@
 let createFolderInto = ''
 
 function main() {
+    addDirectories()
     materializeSettings()
     setPathName()
     listeners()
-    addDirectories()
 }
 
 function materializeSettings() {
-    M.Tabs.init(document.querySelector('#tabs-swipe'), {swipeable: true});
+    M.Tabs.init(document.querySelector('#tabs-swipe'), { swipeable: true });
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
     M.Modal.init(document.querySelectorAll('.modal'));
 }
@@ -31,7 +31,7 @@ function setPathName() {
 }
 
 function openModal(e) {
-    if(e.target.classList.contains('create-new-folder')) {
+    if (e.target.classList.contains('create-new-folder')) {
         M.Modal.getInstance(document.querySelector('.modal')).open()
         createFolderInto = e.target.parentNode.parentNode.nextElementSibling
     }
@@ -45,21 +45,38 @@ function addFolder(e) {
 }
 
 function addDirectories() {
-    let directories = JSON.parse(localStorage.getItem('directories'))
-    document.querySelector('.collapsible-body')
-    // console.log(directories)
-    setTimeout(() => {
-        for(let dir of directories) {
-            for(let str of dir.fullPath.split('\\')) {
-                // console.log(str)
-                for(let spanText of document.querySelectorAll('span.local-root')) {
-                    console.log('STR: ', str)
-                    console.log('SPAN: ', spanText.innerText)
+    let directories = JSON.parse(localStorage.getItem('directories')),
+        localRoot = document.querySelector('#local-root'),
+        root = ''; // Type HTMLElement,
+
+    for (let dir of directories) {
+        for (let [i, name] of dir.fullPath.split('\\').entries()) {
+            if (name !== localStorage.getItem('path') && i > 0) {
+                if ((dir.fullPath.split('\\').length - 1) === i) {
+                    if (!dir.lastIsDirectoy) {
+                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name)
+                    } else {
+                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
+                        root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                    }
+                } else {
+                    try {
+                        root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                        if (name !== root.innerText) {
+                            for (let child of root.parentElement.parentElement.parentElement.parentElement.children) {
+                                root = child.children[0].children[0].children[1]
+                            }
+                        }
+                    } catch (error) {
+                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
+                        root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                    }
                 }
+            } else {
+                root = document.querySelector('.local-root')
             }
-            // console.log(dir)
         }
-    }, 3000)
+    }
 }
 
 function collapsibleHTML(folderName) {
@@ -77,6 +94,16 @@ function collapsibleHTML(folderName) {
             <div class="collapsible-body"></div>
         </li>
     </ul>`
+}
+
+function collapsibleHTMLFile(filename) {
+    return `
+    <div class="collapsible-body-file">
+        <i class="material-icons left">insert_drive_file</i>
+        ${filename}
+        <i class="material-icons right">file_upload</i>
+    </div>
+    `
 }
 
 document.addEventListener('DOMContentLoaded', main)
