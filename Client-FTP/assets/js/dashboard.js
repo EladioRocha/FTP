@@ -1,11 +1,31 @@
 let createFolderInto = ''
 
 function main() {
-    addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
-    addDirectories(JSON.parse(localStorage.getItem('server')), localStorage.getItem('pathServer'), 'server-root')
-    materializeSettings()
+    ipcRenderer.on('upload-file', (event, data) => {
+        data = JSON.parse(data);
+        instanceToast(data.message);
+        resetSwipeRoot()
+        addDirectories(data.directories, localStorage.getItem('pathServer'), 'server-root', true)
+    })
+    ipcRenderer.on('download-file', (event, data) => { 
+        data = JSON.parse(data); 
+        instanceToast(data.message); 
+        resetSwipeLocal()
+        addDirectories(data.directories, localStorage.getItem('path'), 'local-root')
+    })
     setPathName()
+    addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
+    addDirectories(JSON.parse(localStorage.getItem('server')), localStorage.getItem('pathServer'), 'server-root', true)
+    materializeSettings()
     listeners()
+}
+
+function resetSwipeRoot() {
+    document.querySelector('#server-root').innerHTML = ''
+}
+
+function resetSwipeLocal() {
+    document.querySelector('#local-root').innerHTML = ''
 }
 
 function materializeSettings() {
@@ -26,9 +46,11 @@ function listeners() {
 
 function setPathName() {
     let client = document.querySelectorAll('.local-root'),
-        path = localStorage.getItem('path')
+        server = document.querySelector('#current-directory-server')
+    path = localStorage.getItem('path')
     client[0].innerText = path
     client[1].value = `${path}/`
+    server.value = localStorage.getItem('cd') + '/'
 }
 
 function openModal(e) {
@@ -45,7 +67,7 @@ function addFolder(e) {
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
 }
 
-function addDirectories(directories, pathName, selector) {
+function addDirectories(directories, pathName, selector, isServerSwipe = false) {
     let root = ''; // Type HTMLElement,
     console.log(directories)
     for (let dir of directories) {
@@ -53,10 +75,14 @@ function addDirectories(directories, pathName, selector) {
             if (name !== pathName && i > 0) {
                 if ((dir.fullPath.split('\\').length - 1) === i) {
                     if (!dir.lastIsDirectoy) {
-                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name)
+                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name, isServerSwipe)
                     } else {
-                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
-                        root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                        try {
+                            root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
+                            root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                        } catch (error) {
+                            // Silent is golden
+                        }
                     }
                 } else {
                     try {
@@ -67,8 +93,12 @@ function addDirectories(directories, pathName, selector) {
                             }
                         }
                     } catch (error) {
-                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
-                        root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                        try {
+                            root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
+                            root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
+                        } catch (error) {
+                            // Silent is golden
+                        }
                     }
                 }
             } else {
@@ -95,21 +125,44 @@ function collapsibleHTML(folderName) {
     </ul>`
 }
 
-function collapsibleHTMLFile(filename) {
+function collapsibleHTMLFile(filename, isServerSwipe = false) {
+
     return `
     <div class="collapsible-body-file">
         <i class="material-icons left">insert_drive_file</i>
         ${filename}
-        <i class="material-icons right btn-upload" data-command="get">file_upload</i>
+        <i class="material-icons right ${!isServerSwipe ? 'btn-upload' : 'btn-download'}">${!isServerSwipe ? 'file_upload' : 'file_download'}</i>
     </div>
     `
 }
 
 function uploadFile(e) {
-    if(e.target.classList.contains('btn-upload')) {
-        e.target.parentElement.innerText.split('\n')[1]
-        e.target.parentElement.parentElement.parentElement.children[0].children[1].innerText
-        // ipcRenderer.send('')
+    if (e.target.classList.contains('btn-upload')) {
+        let paths = [e.target.parentElement.innerText.split('\n')[1]]
+        ipcRenderer.send('upload-file', getDirectory(e.target.parentElement.parentElement.parentElement.children[0], paths, 'put'))
+    }
+}
+
+function downloadFile(e) {
+    if (e.target.classList.contains('btn-download')) {
+        let paths = [e.target.parentElement.innerText.split('\n')[1]]
+        ipcRenderer.send('download-file', getDirectory(e.target.parentElement.parentElement.parentElement.children[0], paths, 'get'))
+    }
+}
+
+function getDirectory(dir, paths, verb) {
+    while (true) {
+        try {
+            paths.push(dir.innerText.split('\n')[1])
+            dir = dir.parentElement.parentElement.parentElement.parentElement.children[0]
+        } catch (error) {
+            let url = ''
+            paths.pop()
+            for (let i = (paths.length - 1); i >= 0; i--) {
+                url += paths[i] + '/'
+            }
+            return { paths, dir: url, cd: localStorage.getItem('cd'), id: localStorage.getItem('id'), verb, lcd: localStorage.getItem('lcd'), path: localStorage.getItem('path') }
+        }
     }
 }
 
@@ -118,4 +171,8 @@ document.querySelector('#tab-swipe-1').addEventListener('click', (e) => {
     openModal(e)
     uploadFile(e)
 })
+document.querySelector('#tab-swipe-2').addEventListener('click', (e) => {
+    downloadFile(e)
+})
 document.querySelector('#add-folder').addEventListener('click', addFolder)
+document.querySelector('#tabs-swipe > li:nth-child(1)')

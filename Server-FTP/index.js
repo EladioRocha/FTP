@@ -179,25 +179,72 @@ let pid = 1
 function listenClient(socket) {
 	socket.on('data', (data) => {
 		data = JSON.parse(data.toString())
-		socket.write(JSON.stringify(action(data.id, data.verb, data.username, data.password)))
+		console.log(data)
+		socket.write(JSON.stringify(action(data.id, data.verb, data)))
 	})
 }
 
-function action(userId = '', verb = '', ...data) {
+function action(id, verb, data) {
 	let response = ''
 	switch (verb) {
 		case 'join':
-			if (existUser(data[0], data[1])) {
+			if (existUser(data.username, data.password)) {
 				let directories = []
 				let server = []
-				directories = createDirectory(data[0], directories)
+				directories = createDirectory(data.username, directories)
 				server = serverDirectories('root', server)
-				console.log(server)
-				response = { success: true, message: 'Datos de usuario son correctos', path: data[0], directories, server }
+				response = { success: true, message: 'Datos de usuario son correctos', path: data.username, directories, server }
 			} else {
 				response = { success: false, message: 'Datos del usuario son incorrectos' }
 			}
-			break;
+		break;
+		case 'put':
+			response = uploadFile(data)
+		break;
+		case 'get':
+			response = downloadFile(data)
+		break;
+	}
+
+	return response
+}
+
+function uploadFile(data) {
+	let response = ''
+	try {
+		let directories = []
+		fs.copyFileSync(path.join(__dirname, data.dir), path.join(__dirname, data.cd, data.paths.shift()))
+		traverseDir('root', directories)
+		directories = directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		response = {success: true, message: 'El archivo se ha subido correctamente', directories}
+	} catch (error) {
+		response = {success: true, message: 'Ha ocurrido un error al subir el archivo'}
+	}
+
+	return response
+}
+
+function downloadFile(data) {
+	let response = ''
+	try {
+		let directories = []
+		fs.copyFileSync(path.join(__dirname, data.dir), path.join(__dirname, data.lcd, data.paths.shift()))
+		traverseDir(data.path, directories)
+		directories = directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		response = {success: true, message: 'El archivo se ha descargado exitosamente', directories}
+	} catch (error) {
+		console.log(error)
+		response = {success: true, message: 'Ha ocurrido un error al subir el archivo'}
 	}
 
 	return response
@@ -205,6 +252,10 @@ function action(userId = '', verb = '', ...data) {
 
 function existUser(username, password) {
 	return JSON.parse(fs.readFileSync('db.json')).users.find(user => user.username === username && user.password === password) ? true : false
+}
+
+function deleteDir() {
+	fs.rmdirSync()
 }
 
 function createDirectory(dir, directories) {
@@ -218,9 +269,6 @@ function createDirectory(dir, directories) {
 				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
 			}
 		})
-		// console.log(directories)
-		// console.log(path.join( __dirname, directories[0].split('\\').join('/') ).isDirectory())
-		// console.log(directories.map(fs.lstatSync(el).isDirectory()))
 	}
 }
 

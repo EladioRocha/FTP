@@ -13,10 +13,11 @@ function loadNewPage(event, data) {
         localStorage.setItem('directories', JSON.stringify(data.directories))
         localStorage.setItem('server', JSON.stringify(data.server))
         localStorage.setItem('pathServer', 'root')
+        localStorage.setItem('cd', 'root')
+        localStorage.setItem('lcd', data.path)
         location.href = 'dashboard.html'
-    } else {
-        instanceToast(data.message)
     }
+    instanceToast(data.message)
 }
 
 function getSocketId(event, data) {
@@ -24,6 +25,7 @@ function getSocketId(event, data) {
 }
 
 function main() {
+    localStorage.clear()
     ipcRenderer.send('socket-id', 'id')
     ipcRenderer.on('load-page', loadNewPage)
     ipcRenderer.on('socket-id', getSocketId)

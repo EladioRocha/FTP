@@ -27,7 +27,7 @@
                         <i class="material-icons grey lighten-3 create-new-folder">create_new_folder</i>
                     </span>
                 </div>
-                <div class="collapsible-body"></div>
+                <div class="collapsible-body" id="local-root"></div>
             </li>
         </ul>
     </div>
@@ -39,7 +39,7 @@
                     <span class="server-root">root</span>
                     <i class="material-icons">arrow_drop_down</i>
                 </div>
-                <div class="collapsible-body"></div>
+                <div class="collapsible-body" id="server-root"></div>
             </li>
         </ul>
     </div>
@@ -50,14 +50,14 @@
                     <p class="col s3">Ruta actual (Local LCD)</p>
                     <div class="input-field col s6">
                         <i class="material-icons prefix">folder_open</i>
-                        <input type="text" class="validate local-root" id="current-directory" min="5">
+                        <input type="text" class="validate local-root" id="current-directory-local">
                     </div>
                 </section>
                 <section class="col s12">
                     <p class="col s3">Ruta actual (Servidor CD)</p>
                     <div class="input-field col s6">
                         <i class="material-icons prefix">folder_open</i>
-                        <input type="text" class="validate" id="current-directory" value="root/">
+                        <input type="text" class="validate" id="current-directory-server">
                     </div>
                 </section>
                 <section class="col s12 mt-2">
