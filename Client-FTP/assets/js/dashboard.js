@@ -1,7 +1,8 @@
 let createFolderInto = ''
 
 function main() {
-    addDirectories()
+    addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
+    addDirectories(JSON.parse(localStorage.getItem('server')), localStorage.getItem('pathServer'), 'server-root')
     materializeSettings()
     setPathName()
     listeners()
@@ -44,14 +45,12 @@ function addFolder(e) {
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
 }
 
-function addDirectories() {
-    let directories = JSON.parse(localStorage.getItem('directories')),
-        localRoot = document.querySelector('#local-root'),
-        root = ''; // Type HTMLElement,
-
+function addDirectories(directories, pathName, selector) {
+    let root = ''; // Type HTMLElement,
+    console.log(directories)
     for (let dir of directories) {
         for (let [i, name] of dir.fullPath.split('\\').entries()) {
-            if (name !== localStorage.getItem('path') && i > 0) {
+            if (name !== pathName && i > 0) {
                 if ((dir.fullPath.split('\\').length - 1) === i) {
                     if (!dir.lastIsDirectoy) {
                         root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name)
@@ -73,7 +72,7 @@ function addDirectories() {
                     }
                 }
             } else {
-                root = document.querySelector('.local-root')
+                root = document.querySelector('.' + selector)
             }
         }
     }
@@ -101,11 +100,22 @@ function collapsibleHTMLFile(filename) {
     <div class="collapsible-body-file">
         <i class="material-icons left">insert_drive_file</i>
         ${filename}
-        <i class="material-icons right">file_upload</i>
+        <i class="material-icons right btn-upload" data-command="get">file_upload</i>
     </div>
     `
 }
 
+function uploadFile(e) {
+    if(e.target.classList.contains('btn-upload')) {
+        e.target.parentElement.innerText.split('\n')[1]
+        e.target.parentElement.parentElement.parentElement.children[0].children[1].innerText
+        // ipcRenderer.send('')
+    }
+}
+
 document.addEventListener('DOMContentLoaded', main)
-document.querySelector('#tab-swipe-1').addEventListener('click', openModal)
+document.querySelector('#tab-swipe-1').addEventListener('click', (e) => {
+    openModal(e)
+    uploadFile(e)
+})
 document.querySelector('#add-folder').addEventListener('click', addFolder)

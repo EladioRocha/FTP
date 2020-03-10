@@ -11,6 +11,8 @@ function loadNewPage(event, data) {
     if(data.success) {
         localStorage.setItem('path', data.path)
         localStorage.setItem('directories', JSON.stringify(data.directories))
+        localStorage.setItem('server', JSON.stringify(data.server))
+        localStorage.setItem('pathServer', 'root')
         location.href = 'dashboard.html'
     } else {
         instanceToast(data.message)

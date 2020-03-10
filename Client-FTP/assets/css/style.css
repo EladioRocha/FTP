@@ -24,3 +24,7 @@ span.badge.new:after {
 .collapsible-body-file {
     padding: 1rem;
 }
+
+.swipe {
+    overflow: auto;
+}

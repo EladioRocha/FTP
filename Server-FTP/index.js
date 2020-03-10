@@ -189,9 +189,11 @@ function action(userId = '', verb = '', ...data) {
 		case 'join':
 			if (existUser(data[0], data[1])) {
 				let directories = []
+				let server = []
 				directories = createDirectory(data[0], directories)
-				console.log(directories)
-				response = { success: true, message: 'Datos de usuario son correctos', path: data[0], directories }
+				server = serverDirectories('root', server)
+				console.log(server)
+				response = { success: true, message: 'Datos de usuario son correctos', path: data[0], directories, server }
 			} else {
 				response = { success: false, message: 'Datos del usuario son incorrectos' }
 			}
@@ -210,13 +212,6 @@ function createDirectory(dir, directories) {
 		fs.mkdirSync(dir)
 	} else {
 		traverseDir(dir, directories)
-		// console.log( directories[0].split('\\').join('/') )
-		for(let directory of directories) {
-			directories
-			if(fs.lstatSync(path.join(__dirname, directories[2])).isDirectory()) {
-				
-			}
-		}
 		return directories.map((dir) => {
 			return {
 				fullPath: dir,
@@ -227,6 +222,17 @@ function createDirectory(dir, directories) {
 		// console.log(path.join( __dirname, directories[0].split('\\').join('/') ).isDirectory())
 		// console.log(directories.map(fs.lstatSync(el).isDirectory()))
 	}
+}
+
+function serverDirectories(dir, server) {
+	traverseDir(dir, server)
+	return server.map((dir) => {
+		return {
+			fullPath: dir,
+			lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+		}
+	})
+
 }
 
 function traverseDir(dir, directories) {
