@@ -1,4 +1,5 @@
-let createFolderInto = ''
+let createFolderInto = '',
+    multipleFiles = []
 
 function main() {
     ipcRenderer.on('upload-file', (event, data) => {
@@ -24,7 +25,6 @@ function main() {
         let pathLcd = document.querySelector('#current-directory-local'),
             pathCd = document.querySelector('#current-directory-server')
         if(data.success) {
-            console.log(data)
             localStorage.removeItem('cd')
             localStorage.removeItem('lcd')
             localStorage.setItem('lcd', pathLcd.value)
@@ -42,7 +42,7 @@ function main() {
         instanceToast(data.message);
     })
     setPathName()
-    // addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
+    addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
     addDirectories(JSON.parse(localStorage.getItem('server')), localStorage.getItem('pathServer'), 'server-root', true)
     materializeSettings()
     listeners()
@@ -93,29 +93,27 @@ function addFolder(e) {
         paths = [];
     createFolderInto.innerHTML += collapsibleHTML(folder.value)
     folder.value = ''
-    // paths.push(createFolderInto.children[(createFolderInto.children.length - 1)].children[0].children[0].children[1].innerText)
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
     ipcRenderer.send('create-directory', getPath(createFolderInto.children[(createFolderInto.children.length - 1)].children[0].children[0].children[1], paths, 'mkdir'))
 }
 
 
 function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
-    let directories = JSON.parse(localStorage.getItem('directories')),
-        root = ''; // Type HTMLElement,
-    for(let dir of directories) {
+    let root = '' // Type HTMLElement,
+
+    for(let dir of dirs) {
         for(let [i, name] of dir.fullPath.split('\\').entries()) {
-            if(name !== 'luis' && i > 0) {
+            if(name !== pathDefaultName && i > 0) {
                 if ((dir.fullPath.split('\\').length - 1) === i) {
                     if (!dir.lastIsDirectoy) {
                         root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name, serverDir)
                         root = root.parentElement.nextElementSibling
                     } else {
-                        console.log(root)
                         root.parentElement.parentElement.children[1].innerHTML += collapsibleHTML(name, serverDir)
                         root = root.parentElement.parentElement.children[1].lastElementChild.children[0].children[0].children[1]
                     }
                 } else {
-                    if(root.innerText === localStorage.getItem('path')) {
+                    if(root.innerText === pathDefaultName) {
                         for(let elem of root.parentElement.nextElementSibling.children) {
                             if(elem.nodeName === 'UL') {
                                 let elemTxt = elem.children[0].children[0].children[1]
@@ -136,7 +134,7 @@ function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
                     }
                 }
             } else {
-                root = document.querySelector('.local-root')
+                root = document.querySelector(`.${selector}`)
             }
             
         }
@@ -180,10 +178,12 @@ function uploadFile(e) {
 function downloadFile(e) {
     if (e.target.classList.contains('btn-download')) {
         let paths = [e.target.parentElement.innerText.split('\n')[1]]
+        console.log(e.target.parentElement.parentElement.parentElement.children[0])
         ipcRenderer.send('download-file', getDirectory(e.target.parentElement.parentElement.parentElement.children[0], paths, 'get'))
     }
 }
 
+// This function works with the upload file to server or user download from server
 function getDirectory(dir, paths, verb) {
     while (true) {
         try {
@@ -200,6 +200,7 @@ function getDirectory(dir, paths, verb) {
     }
 }
 
+// This function works when the user create new folder document
 function getPath(dir, paths, verb) {
     while (true) {
         try {
@@ -225,10 +226,32 @@ function deleteDirectory(e) {
     }
 }
 
+function ctrlClick(e) {
+    if(e.target.classList.contains('collapsible-body-file') && e.ctrlKey) {
+        let paths = [],
+            containerBtn = document.querySelector('#container-btn-multiple');
+
+        e.target.classList += ' grey lighten-3'
+        containerBtn.classList.remove('hide')
+        paths.push(e.target.innerText.split('\n')[1])
+        multipleFiles.push(getDirectory(e.target.parentElement.parentElement.children[0], paths, 'put'))
+    }
+}
+
+function sendMultipleFiles() {
+    for(let file of multipleFiles) {
+        console.log(file)
+        // setTimeout(() => {
+        //     ipcRenderer.send('upload-file', file)
+        // }, 1000)
+    }
+}
+
 document.addEventListener('DOMContentLoaded', main)
 document.querySelector('#tab-swipe-1').addEventListener('click', (e) => {
     openModal(e)
     uploadFile(e)
+    ctrlClick(e)
 })
 document.querySelector('#tab-swipe-2').addEventListener('click', (e) => {
     downloadFile(e)
@@ -237,3 +260,4 @@ document.querySelector('#tab-swipe-2').addEventListener('click', (e) => {
 document.querySelector('#add-folder').addEventListener('click', addFolder)
 document.querySelector('#btn-save-lcd').addEventListener('click', setDirectory)
 document.querySelector('#btn-save-cd').addEventListener('click', setDirectory)
+document.querySelector('#btn-multiple').addEventListener('click', sendMultipleFiles)

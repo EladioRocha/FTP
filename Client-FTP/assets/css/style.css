@@ -2,6 +2,10 @@
     margin-top: 2rem;
 }
 
+.mb-2 {
+    margin-bottom: 2rem;
+}
+
 span.badge.new {
     color: rgba(0,0,0,0.87);
 }
@@ -27,4 +31,8 @@ span.badge.new:after {
 
 .swipe {
     overflow: auto;
+}
+
+.btn-upload:hover, .btn-download:hover {
+    cursor: pointer;
 }
