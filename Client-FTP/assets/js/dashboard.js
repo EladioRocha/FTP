@@ -99,81 +99,48 @@ function addFolder(e) {
 }
 
 
-function addDirectories() {
+function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
     let directories = JSON.parse(localStorage.getItem('directories')),
         root = ''; // Type HTMLElement,
-    let count = 0;
     for(let dir of directories) {
         for(let [i, name] of dir.fullPath.split('\\').entries()) {
             if(name !== 'luis' && i > 0) {
                 if ((dir.fullPath.split('\\').length - 1) === i) {
                     if (!dir.lastIsDirectoy) {
-                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name)
+                        root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name, serverDir)
                         root = root.parentElement.nextElementSibling
                     } else {
-                        root.parentElement.parentElement.children[1].innerHTML += collapsibleHTML(name)
+                        console.log(root)
+                        root.parentElement.parentElement.children[1].innerHTML += collapsibleHTML(name, serverDir)
                         root = root.parentElement.parentElement.children[1].lastElementChild.children[0].children[0].children[1]
-                        // console.log('Es ultimo xD', name, root.parentElement)
                     }
                 } else {
-                    // console.log('JEJEJE', root, name)
                     if(root.innerText === localStorage.getItem('path')) {
-                        console.log()
                         for(let elem of root.parentElement.nextElementSibling.children) {
-                            console.log(elem.nodeName)
                             if(elem.nodeName === 'UL') {
-                                // WORKS HERE
+                                let elemTxt = elem.children[0].children[0].children[1]
+                                if(name === elemTxt.innerText) {
+                                    root = elemTxt
+                                }
                             }
-                            // console.log(elem)
                         }
-                        // console.log(root)
                     } else {
-
+                        for(let elem of root.parentElement.nextElementSibling.children) {
+                            if(elem.nodeName === 'UL') {
+                                let elemTxt = elem.children[0].children[0].children[1]
+                                if(name === elemTxt.innerText) {
+                                    root = elemTxt
+                                }
+                            }
+                        }
                     }
                 }
-                console.log('MYYY DIR', dir)
-                count++
-                if(count === 3) {
-                    return
-                }
             } else {
-                // console.log('ENTRO EN EL LOCAL ROOT')
                 root = document.querySelector('.local-root')
             }
             
         }
     }
-
-    // for (let dir of directories) {
-    //     for (let [i, name] of dir.fullPath.split('\\').entries()) {
-    //         console.log(localStorage.getItem('path'))
-    //         if (name !== localStorage.getItem('path') && i > 0) {
-    //             if ((dir.fullPath.split('\\').length - 1) === i) {
-    //                 console.log(dir, dir.fullPath.split('\\').length)
-    //                 if (!dir.lastIsDirectoy) {
-    //                     root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name)
-    //                 } else {
-    //                     root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
-    //                     root = root.parentElement.nextElementSibling.children[(root.parentElement.nextElementSibling.children.length - 1)].children[0].children[0].children[1]
-    //                 }
-    //             } else {
-    //                 try {
-    //                     root = root.parentElement.nextElementSibling.children[0].children[0].children[0].children[1]
-    //                     if (name !== root.innerText) {
-    //                         for (let child of root.parentElement.parentElement.parentElement.parentElement.children) {
-    //                             root = child.children[0].children[0].children[1]
-    //                         }
-    //                     }
-    //                 } catch (error) {
-    //                     root.parentElement.nextElementSibling.innerHTML += collapsibleHTML(name)
-    //                     root = root.parentElement.nextElementSibling.children[(root.parentElement.nextElementSibling.children.length - 1)].children[0].children[0].children[1]
-    //                 }
-    //             }
-    //         } else {
-    //             root = document.querySelector('.local-root')
-    //         }
-    //     }
-    // }
 }
 
 function collapsibleHTML(folderName, isServerSwipe = true) {
