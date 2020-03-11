@@ -7,6 +7,8 @@ ipcMain.on('close-session', closeSession)
 ipcMain.on('socket-id', getSocketId)
 ipcMain.on('upload-file', uploadFile)
 ipcMain.on('download-file', downloadFile)
+ipcMain.on('create-directory', createDirectory)
+ipcMain.on('set-directory', setDirectory)
 
 function getSocketId(event, data) {
     event.reply('socket-id', {success: true, message: 'Conexión establecida con éxito', id: tcpClient.response})
@@ -25,6 +27,16 @@ function uploadFile(event, data) {
 function downloadFile(event, data) {
     tcpClient.message(data)
     sendReply(event, 'download-file')
+}
+
+function createDirectory(event, data) {
+    tcpClient.message(data)
+    sendReply(event, 'create-directory')
+}
+
+function setDirectory(event, data) {
+    tcpClient.message(data)
+    sendReply(event, 'set-directory')
 }
 
 function sendReply(event, identifier) {

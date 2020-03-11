@@ -204,6 +204,12 @@ function action(id, verb, data) {
 		case 'get':
 			response = downloadFile(data)
 		break;
+		case 'mkdir':
+			response = createFolder(data)
+		break;
+		case 'path':
+			response = setPath(data)
+		break;
 	}
 
 	return response
@@ -244,7 +250,7 @@ function downloadFile(data) {
 		response = {success: true, message: 'El archivo se ha descargado exitosamente', directories}
 	} catch (error) {
 		console.log(error)
-		response = {success: true, message: 'Ha ocurrido un error al subir el archivo'}
+		response = {success: false, message: 'Ha ocurrido un error al subir el archivo'}
 	}
 
 	return response
@@ -254,8 +260,16 @@ function existUser(username, password) {
 	return JSON.parse(fs.readFileSync('db.json')).users.find(user => user.username === username && user.password === password) ? true : false
 }
 
-function deleteDir() {
-	fs.rmdirSync()
+function createFolder({dir}) {
+	let response = ''
+	try {
+		fs.mkdirSync(dir)
+		response = {success: true, message: 'El directorio se ha creado correctamente'}
+	} catch (error) {
+		response = {success: false, message: 'Ha ocurrido un error al crear el directorio'}
+	}
+
+	return response
 }
 
 function createDirectory(dir, directories) {
@@ -295,26 +309,42 @@ function traverseDir(dir, directories) {
 	});
 }
 
-// function getAllDirectories(dir, directories) {
-// 	let data = fs.readdirSync(dir)
-// 	data.forEach(el => {
-// 		let isDirectory = fs.lstatSync(path.join(__dirname, dir, el)).isDirectory()
-// 		if(isDirectory) {
-// 			console.log(el)
-// 			readDirectory(dir, el, directories)
-// 		}
-// 	})
+function setPath(data) {
+	let response = ''
+	try {
+		let isValidPath = fs.lstatSync(path.join(__dirname, data.path)).isDirectory()
+		if(isValidPath) {
+			response = {success: true, message: 'Se ha actualizado la ruta exitosamente'}
+		} else {
+			response = {success: false, message: 'La ruta especificada no es valida'}		
+		}
+	} catch (error) {
+		response = {success: false, message: 'La ruta especificada no es valida'}		
+	}
+	
+	let root = [],
+		local = [];
+	traverseDir('root', root)
+	root = root.map((dir) => {
+		return {
+			fullPath: dir,
+			lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+		}
+	})
 
-// 	setTimeout(() => {
-// 		console.log(directories)
-// 	}, 3000)
-// }
+	traverseDir(data.local, local)
+	local = local.map((dir) => {
+		return {
+			fullPath: dir,
+			lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+		}
+	})
 
-// function readDirectory (dir, subdir, directories) {
-// 	fs.readdirSync(path.join(dir)).forEach(el => {
-
-// 	})
-// }
+	response['root'] = root
+	response['local'] = local
+	
+	return response
+}
 
 let server = net.createServer(socket => {
 	socket.session = { id: pid++ }

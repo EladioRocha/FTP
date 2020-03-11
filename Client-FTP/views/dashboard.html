@@ -24,7 +24,7 @@
                     <span class="local-root"></span>
                     <i class="material-icons">arrow_drop_down</i>
                     <span class="new badge grey lighten-3">
-                        <i class="material-icons grey lighten-3 create-new-folder">create_new_folder</i>
+                        <i class="material-icons grey lighten-3 create-new-folder btn-create-directory">create_new_folder</i>
                     </span>
                 </div>
                 <div class="collapsible-body" id="local-root"></div>
@@ -38,6 +38,9 @@
                     <i class="material-icons">folder</i>
                     <span class="server-root">root</span>
                     <i class="material-icons">arrow_drop_down</i>
+                    <span class="new badge grey lighten-3">
+                        <i class="material-icons grey lighten-3 create-new-folder btn-create-directory">create_new_folder</i>
+                    </span>
                 </div>
                 <div class="collapsible-body" id="server-root"></div>
             </li>
@@ -52,12 +55,26 @@
                         <i class="material-icons prefix">folder_open</i>
                         <input type="text" class="validate local-root" id="current-directory-local">
                     </div>
+                    <div class="col s3">
+                        <div class="center mt-2">
+                            <button class="btn waves-effect waves-light green lighten-1" id="btn-save-lcd">Guardar
+                                <i class="material-icons right">save</i>
+                            </button>
+                        </div>
+                    </div>
                 </section>
                 <section class="col s12">
                     <p class="col s3">Ruta actual (Servidor CD)</p>
                     <div class="input-field col s6">
                         <i class="material-icons prefix">folder_open</i>
                         <input type="text" class="validate" id="current-directory-server">
+                    </div>
+                    <div class="col s3">
+                        <div class="center mt-2">
+                            <button class="btn waves-effect waves-light green lighten-1" id="btn-save-cd">Guardar
+                                <i class="material-icons right">save</i>
+                            </button>
+                        </div>
                     </div>
                 </section>
                 <section class="col s12 mt-2">
