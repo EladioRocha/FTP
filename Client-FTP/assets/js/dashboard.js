@@ -1,5 +1,5 @@
 let createFolderInto = '',
-    multipleFiles = []
+    multipleFiles = { data: [], verb: '' }
 
 function main() {
     ipcRenderer.on('upload-file', (event, data) => {
@@ -9,28 +9,28 @@ function main() {
         addDirectories(data.directories, localStorage.getItem('pathServer'), 'server-root', true)
         document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
     })
-    ipcRenderer.on('download-file', (event, data) => { 
-        data = JSON.parse(data); 
-        instanceToast(data.message); 
+    ipcRenderer.on('download-file', (event, data) => {
+        data = JSON.parse(data);
+        instanceToast(data.message);
         resetSwipeLocal()
         addDirectories(data.directories, localStorage.getItem('path'), 'local-root')
         document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
     })
     ipcRenderer.on('create-directory', (event, data) => {
         data = JSON.parse(data)
-        instanceToast(data.message); 
+        instanceToast(data.message);
     })
     ipcRenderer.on('set-directory', (event, data) => {
         data = JSON.parse(data)
         let pathLcd = document.querySelector('#current-directory-local'),
             pathCd = document.querySelector('#current-directory-server')
-        if(data.success) {
+        if (data.success) {
             localStorage.removeItem('cd')
             localStorage.removeItem('lcd')
             localStorage.setItem('lcd', pathLcd.value)
             localStorage.setItem('cd', pathCd.value)
             resetSwipeLocal()
-            resetSwipeRoot()    
+            resetSwipeRoot()
             addDirectories(data.local, localStorage.getItem('path'), 'local-root')
             addDirectories(data.root, localStorage.getItem('pathServer'), 'server-root', true)
             document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
@@ -101,9 +101,9 @@ function addFolder(e) {
 function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
     let root = '' // Type HTMLElement,
 
-    for(let dir of dirs) {
-        for(let [i, name] of dir.fullPath.split('\\').entries()) {
-            if(name !== pathDefaultName && i > 0) {
+    for (let dir of dirs) {
+        for (let [i, name] of dir.fullPath.split('\\').entries()) {
+            if (name !== pathDefaultName && i > 0) {
                 if ((dir.fullPath.split('\\').length - 1) === i) {
                     if (!dir.lastIsDirectoy) {
                         root.parentElement.nextElementSibling.innerHTML += collapsibleHTMLFile(name, serverDir)
@@ -113,20 +113,20 @@ function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
                         root = root.parentElement.parentElement.children[1].lastElementChild.children[0].children[0].children[1]
                     }
                 } else {
-                    if(root.innerText === pathDefaultName) {
-                        for(let elem of root.parentElement.nextElementSibling.children) {
-                            if(elem.nodeName === 'UL') {
+                    if (root.innerText === pathDefaultName) {
+                        for (let elem of root.parentElement.nextElementSibling.children) {
+                            if (elem.nodeName === 'UL') {
                                 let elemTxt = elem.children[0].children[0].children[1]
-                                if(name === elemTxt.innerText) {
+                                if (name === elemTxt.innerText) {
                                     root = elemTxt
                                 }
                             }
                         }
                     } else {
-                        for(let elem of root.parentElement.nextElementSibling.children) {
-                            if(elem.nodeName === 'UL') {
+                        for (let elem of root.parentElement.nextElementSibling.children) {
+                            if (elem.nodeName === 'UL') {
                                 let elemTxt = elem.children[0].children[0].children[1]
-                                if(name === elemTxt.innerText) {
+                                if (name === elemTxt.innerText) {
                                     root = elemTxt
                                 }
                             }
@@ -136,7 +136,6 @@ function addDirectories(dirs, pathDefaultName, selector, serverDir = false) {
             } else {
                 root = document.querySelector(`.${selector}`)
             }
-            
         }
     }
 }
@@ -217,34 +216,47 @@ function getPath(dir, paths, verb) {
 }
 
 function setDirectory(e) {
-    ipcRenderer.send('set-directory', {path: e.target.parentElement.parentElement.parentElement.children[1].children[1].value, verb: 'path', local: localStorage.getItem('path')})
+    ipcRenderer.send('set-directory', { path: e.target.parentElement.parentElement.parentElement.children[1].children[1].value, verb: 'path', local: localStorage.getItem('path') })
 }
 
 function deleteDirectory(e) {
-    if(e.target.classList.contains('btn-delete')) {
+    if (e.target.classList.contains('btn-delete')) {
 
     }
 }
 
 function ctrlClick(e) {
-    if(e.target.classList.contains('collapsible-body-file') && e.ctrlKey) {
+    if (e.target.classList.contains('collapsible-body-file') && e.ctrlKey) {
         let paths = [],
             containerBtn = document.querySelector('#container-btn-multiple');
-
-        e.target.classList += ' grey lighten-3'
-        containerBtn.classList.remove('hide')
-        paths.push(e.target.innerText.split('\n')[1])
-        multipleFiles.push(getDirectory(e.target.parentElement.parentElement.children[0], paths, 'put'))
+        if (e.target.classList.contains('selected')) {
+            paths.push(e.target.innerText.split('\n')[1])
+            let obj = getDirectory(e.target.parentElement.parentElement.children[0], paths, 'put')
+            e.target.classList.remove('selected')
+            e.target.classList.remove('grey')
+            e.target.classList.remove('ligthen-3')
+            let idx = multipleFiles.data.findIndex(data => data.dir === obj.dir)
+            console.log(
+            multipleFiles.data.splice(idx, idx)
+            )
+        } else {
+            e.target.classList += ' grey lighten-3 selected'
+            containerBtn.classList.remove('hide')
+            paths.push(e.target.innerText.split('\n')[1])
+            multipleFiles.data.push(getDirectory(e.target.parentElement.parentElement.children[0], paths, 'put'))
+            multipleFiles.verb = 'mput'
+        }
     }
 }
 
 function sendMultipleFiles() {
-    for(let file of multipleFiles) {
-        console.log(file)
-        // setTimeout(() => {
-        //     ipcRenderer.send('upload-file', file)
-        // }, 1000)
-    }
+    console.log(multipleFiles.data)
+    ipcRenderer.send('upload-file', multipleFiles)
+    // for(let file of multipleFiles) {
+    // console.log(file)
+    // setTimeout(() => {
+    //     ipcRenderer.send('upload-file', file)
+    // }, 1000)
 }
 
 document.addEventListener('DOMContentLoaded', main)

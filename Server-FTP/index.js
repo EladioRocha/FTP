@@ -188,15 +188,7 @@ function action(id, verb, data) {
 	let response = ''
 	switch (verb) {
 		case 'join':
-			if (existUser(data.username, data.password)) {
-				let directories = []
-				let server = []
-				directories = createDirectory(data.username, directories)
-				server = serverDirectories('root', server)
-				response = { success: true, message: 'Datos de usuario son correctos', path: data.username, directories, server }
-			} else {
-				response = { success: false, message: 'Datos del usuario son incorrectos' }
-			}
+			response = connection(data)
 		break;
 		case 'put':
 			response = uploadFile(data)
@@ -210,6 +202,26 @@ function action(id, verb, data) {
 		case 'path':
 			response = setPath(data)
 		break;
+		case 'mput':
+			response = uploadMultipleFiles(data)
+			console.log('ENTER IN MPUT CASE')
+		break;
+		case 'mget':
+			console.log('ENTER IN MGET CASE')
+	}
+
+	return response
+}
+
+function connection(data) {
+	if (existUser(data.username, data.password)) {
+		let directories = []
+		let server = []
+		directories = createDirectory(data.username, directories)
+		server = serverDirectories('root', server)
+		response = { success: true, message: 'Datos de usuario son correctos', path: data.username, directories, server }
+	} else {
+		response = { success: false, message: 'Datos del usuario son incorrectos' }
 	}
 
 	return response
@@ -294,7 +306,30 @@ function serverDirectories(dir, server) {
 			lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
 		}
 	})
+}
 
+function uploadMultipleFiles({data}) {
+	let response = ''
+	try {
+		let directories = []
+		for(let file of data) {
+			console.log(file)
+			fs.copyFileSync(path.join(__dirname, file.dir), path.join(__dirname, file.cd, file.paths.shift()))
+		}
+	
+		traverseDir('root', directories)
+		directories = directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		response = {success: true, message: 'Los archivos se han subido correctamente', directories}
+	} catch (error) {
+		response = {success: false, message: 'Ha ocurrido un error en el servidor', directories}
+	}
+
+	return response
 }
 
 function traverseDir(dir, directories) {

@@ -1,3 +1,7 @@
+body {
+    overflow: hidden;
+}
+
 .mt-2 {
     margin-top: 2rem;
 }
