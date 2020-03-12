@@ -204,10 +204,12 @@ function action(id, verb, data) {
 		break;
 		case 'mput':
 			response = uploadMultipleFiles(data)
-			console.log('ENTER IN MPUT CASE')
 		break;
 		case 'mget':
-			console.log('ENTER IN MGET CASE')
+			response = downloadMultiplesFiles(data)
+		case 'delete':
+			response = deleteDirectory(data)
+		break;
 	}
 
 	return response
@@ -309,12 +311,20 @@ function serverDirectories(dir, server) {
 }
 
 function uploadMultipleFiles({data}) {
-	let response = ''
+	let response = '',
+		currentName = '',
+		count = 0,
+		usedNames = [],
+		directories = [];
 	try {
-		let directories = []
 		for(let file of data) {
-			console.log(file)
-			fs.copyFileSync(path.join(__dirname, file.dir), path.join(__dirname, file.cd, file.paths.shift()))
+			currentName = file.paths.shift()
+			usedNames.push(currentName)
+			count = usedNames.filter(name => name === currentName).length;
+			if(count > 1) {
+				currentName += ` (${(count - 1)})`
+			}
+			fs.copyFileSync(path.join(__dirname, file.dir), path.join(__dirname, file.cd, currentName))
 		}
 	
 		traverseDir('root', directories)
@@ -326,9 +336,64 @@ function uploadMultipleFiles({data}) {
 		})
 		response = {success: true, message: 'Los archivos se han subido correctamente', directories}
 	} catch (error) {
+		console.log(error)
 		response = {success: false, message: 'Ha ocurrido un error en el servidor', directories}
 	}
 
+	return response
+}
+
+function downloadMultiplesFiles({data, lcd}) {
+		let response = '',
+		currentName = '',
+		count = 0,
+		usedNames = [],
+		directories = [];
+	try {
+		let directories = []
+		for(let file of data) {
+			currentName = file.paths.shift()
+			usedNames.push(currentName)
+			count = usedNames.filter(name => name === currentName).length;
+			if(count > 1) {
+				currentName += ` (${(count - 1)})`
+			}
+			// path.join(__dirname, data.dir), path.join(__dirname, data.lcd, data.paths.shift())
+			fs.copyFileSync(path.join(__dirname, file.dir), path.join(__dirname, file.lcd, currentName))
+		}
+	
+		traverseDir(lcd, directories)
+		directories = directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		response = {success: true, message: 'Los archivos se han descargado correctamente', directories}
+	} catch (error) {
+		console.log(error)
+		response = {success: false, message: 'Ha ocurrido un error en el servidor', directories}
+	}
+
+	return response
+}
+
+function deleteDirectory(data) {
+	let response = '',
+		directories = []
+	try {
+		fs.rmdirSync(path.join(__dirname, data.dir))
+		traverseDir('root', directories)
+		directories = directories.map((dir) => {
+			return {
+				fullPath: dir,
+				lastIsDirectoy: fs.lstatSync(path.join(__dirname, dir)).isDirectory()
+			}
+		})
+		response = {success: true, message: 'El directorio ha sido eliminado', directories}
+	} catch (error) {
+		response = {success: false, message: 'El directorio no se puede eliminar, aún contiene archivos'}
+	}
 	return response
 }
 

@@ -1,5 +1,5 @@
 let createFolderInto = '',
-    multipleFiles = { data: [], verb: '' }
+    multipleFiles = { data: [], verb: 'mput' }
 
 function main() {
     ipcRenderer.on('upload-file', (event, data) => {
@@ -40,6 +40,14 @@ function main() {
             localStorage.setItem('cd', document.querySelector('#current-directory-server').value)
         }
         instanceToast(data.message);
+    })
+    ipcRenderer.on('delete-directory', (event, data) => {
+        data = JSON.parse(data) 
+        if(data.success) {
+            resetSwipeRoot()
+            addDirectories(data.directories, localStorage.getItem('pathServer'), 'server-root', true)
+        }
+        instanceToast(data.message)
     })
     setPathName()
     addDirectories(JSON.parse(localStorage.getItem('directories')), localStorage.getItem('path'), 'local-root')
@@ -91,7 +99,7 @@ function openModal(e) {
 function addFolder(e) {
     let folder = document.querySelector('#new-folder'),
         paths = [];
-    createFolderInto.innerHTML += collapsibleHTML(folder.value)
+    createFolderInto.innerHTML += collapsibleHTML(folder.value, false)
     folder.value = ''
     document.querySelectorAll('.collapsible').forEach(el => M.Collapsible.init(el))
     ipcRenderer.send('create-directory', getPath(createFolderInto.children[(createFolderInto.children.length - 1)].children[0].children[0].children[1], paths, 'mkdir'))
@@ -201,6 +209,7 @@ function getDirectory(dir, paths, verb) {
 
 // This function works when the user create new folder document
 function getPath(dir, paths, verb) {
+    console.log(dir)
     while (true) {
         try {
             paths.push(dir.innerText)
@@ -220,8 +229,9 @@ function setDirectory(e) {
 }
 
 function deleteDirectory(e) {
-    if (e.target.classList.contains('btn-delete')) {
-
+    if (e.target.classList.contains('delete-directory')) {
+        let paths = []
+        ipcRenderer.send('delete-directory', getPath(e.target.parentElement.parentElement.children[1], paths, 'delete'))
     }
 }
 
@@ -236,27 +246,40 @@ function ctrlClick(e) {
             e.target.classList.remove('grey')
             e.target.classList.remove('ligthen-3')
             let idx = multipleFiles.data.findIndex(data => data.dir === obj.dir)
-            console.log(
-            multipleFiles.data.splice(idx, idx)
-            )
+            delete multipleFiles.data[idx]
+            multipleFiles.data = multipleFiles.data.filter(e => !!e)
         } else {
+            setBtnUploadOrDownloadText(e.target.children[1])
             e.target.classList += ' grey lighten-3 selected'
             containerBtn.classList.remove('hide')
             paths.push(e.target.innerText.split('\n')[1])
             multipleFiles.data.push(getDirectory(e.target.parentElement.parentElement.children[0], paths, 'put'))
-            multipleFiles.verb = 'mput'
         }
     }
 }
 
+function setBtnUploadOrDownloadText(element) {
+    if(element.classList.contains('btn-download')) {
+        let btnMultiple = document.querySelector('#btn-multiple')
+        btnMultiple.innerHTML = `Descargar <i class="material-icons right">file_download</i>`
+        multipleFiles.verb = 'mget'
+        multipleFiles['lcd'] = localStorage.getItem('lcd')
+    }
+}
+
 function sendMultipleFiles() {
-    console.log(multipleFiles.data)
-    ipcRenderer.send('upload-file', multipleFiles)
-    // for(let file of multipleFiles) {
-    // console.log(file)
-    // setTimeout(() => {
-    //     ipcRenderer.send('upload-file', file)
-    // }, 1000)
+    ipcRenderer.send('download-file', multipleFiles)
+    document.querySelector('#container-btn-multiple').classList.add('hide')
+    multipleFiles = {data: [], verb: 'mput'}
+    removeClassSelected()
+}
+
+function removeClassSelected() {
+    for(let elem of document.querySelectorAll('.collapsible-body-file.lighten-3.grey.lighten-3.selected')) {
+        elem.classList.remove('selected')
+        elem.classList.remove('grey')
+        elem.classList.remove('ligthen-3')    
+    }
 }
 
 document.addEventListener('DOMContentLoaded', main)
@@ -268,6 +291,7 @@ document.querySelector('#tab-swipe-1').addEventListener('click', (e) => {
 document.querySelector('#tab-swipe-2').addEventListener('click', (e) => {
     downloadFile(e)
     deleteDirectory(e)
+    ctrlClick(e)
 })
 document.querySelector('#add-folder').addEventListener('click', addFolder)
 document.querySelector('#btn-save-lcd').addEventListener('click', setDirectory)
